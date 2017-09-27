@@ -1,4 +1,4 @@
-package main
+package common
 
 import (
 	"io"
@@ -23,17 +23,17 @@ func init() {
 
 	Trace = log.New(ioutil.Discard,
 		"TRACE: ",
-		log.Ldate|log.Ltime|log.Lshortfile)
+		log.Ldate|log.Ltime|log.Llongfile)
 
 	Info = log.New(os.Stdout,
 		"INFO: ",
-		log.Ldate|log.Ltime|log.Lshortfile)
+		log.Ldate|log.Ltime|log.Llongfile)
 
 	Warning = log.New(os.Stdout,
 		"WARNING: ",
-		log.Ldate|log.Ltime|log.Lshortfile)
+		log.Ldate|log.Ltime|log.Llongfile)
 
 	Error = log.New(io.MultiWriter(file, os.Stderr),
 		"ERROR: ",
-		log.Ldate|log.Ltime|log.Lshortfile)
+		log.Ldate|log.Ltime|log.Llongfile)
 }
