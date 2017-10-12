@@ -103,5 +103,30 @@ func (controller *OrderController) CreateOrder(w http.ResponseWriter, r *http.Re
 	w.WriteHeader(http.StatusOK)
 	common.Info.Println("Created order with id ", id)
 	return
+}
 
+func (controller *OrderController) FindVendorOrders(w http.ResponseWriter, r *http.Request) *error {
+
+	vars := mux.Vars(r)
+	id, err := strconv.Atoi(path.Base(vars["id"]))
+	if err != nil {
+		common.Error.Println("Invalid vendor id", err)
+		return &err
+
+	}
+	orders, err := controller.repo.FindOrders(int64(id))
+	if err != nil {
+		common.Error.Println("Invalid order id", err)
+		return &err
+	}
+	common.Info.Println("order found %d", id)
+	output, err := json.MarshalIndent(&orders, "", "\t\t")
+	if err != nil {
+		return &err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write(output)
+
+	return nil
 }

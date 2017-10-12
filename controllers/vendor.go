@@ -22,6 +22,28 @@ func init() {
 	Vendor.repo = repository.VendorRepository{}
 }
 
+func (controller *VendorController) FindVendor(w http.ResponseWriter, r *http.Request) *error {
+
+	name := r.URL.Query().Get("name")
+	common.Info.Println("Search query name ", name)
+
+	vendors, err := controller.repo.FindVendors(name)
+	if err != nil {
+		common.Error.Println("Could not find any vendors with name: ", name, err)
+		return &err
+	}
+	output, err := json.MarshalIndent(&vendors, "", "\t\t")
+	if err != nil {
+		return &err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write(output)
+
+	return nil
+	return nil
+}
+
 func (controller *VendorController) RetrieveVendor(writer http.ResponseWriter, r *http.Request) {
 
 	vars := mux.Vars(r)

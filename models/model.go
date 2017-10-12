@@ -1,10 +1,10 @@
 package models
 
 type Customer struct {
-	Id           int
-	Name         string
-	MobileNumber int
-	Address      string
+	Id           int    `json:"id"`
+	Name         string `json:"name"`
+	MobileNumber int    `json:"mobile"`
+	Address      string `json:"address"`
 }
 
 type Vendor struct {
@@ -15,9 +15,9 @@ type Vendor struct {
 }
 
 type Order struct {
-	Id           int
-	CustomerId   int
-	VendorId     int
-	OrderDetails string
-	Status       string
+	Id           int    `json:"id"`
+	CustomerId   int    `json:"customerId"`
+	VendorId     int    `json:"vendorId"`
+	OrderDetails string `json:"orderDetails"`
+	Status       string `json:"status"`
 }

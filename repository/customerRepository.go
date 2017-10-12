@@ -14,38 +14,45 @@ type CustomerRepository struct {
  Transaction management code is only for demonstration. it can saftely be removed.
 */
 func (repo *CustomerRepository) Retrieve(id int) (customer models.Customer, err error) {
+
 	customer = models.Customer{}
-	txn, err := Db.Begin()
 	if err != nil {
 		return
 	}
-	defer txn.Commit()
-	err = Db.QueryRow("select id, `name`, owner, address from customer where id = ?", id).Scan(&customer.Id, &customer.Name, &customer.Name, &customer.Address)
-	if err != nil {
-		txn.Rollback()
-	}
+	err = Db.QueryRow("select id, `name`, address, mobile from customer where id = ?", id).
+		Scan(&customer.Id, &customer.Name, &customer.Address, &customer.MobileNumber)
 	return customer, err
 }
 
 // Create a new customer
 func (repo *CustomerRepository) Create(customer *models.Customer) (id int64, err error) {
-	statement := "insert into customer (name, owner, address) values (?, ?, ?)"
+	statement := "insert into customer (name, address, mobile) values (?, ?, ?)"
 	stmt, err := Db.Prepare(statement)
 	if err != nil {
+		common.Error.Println("Customer could not be created ", err)
 		return
 	}
 	defer stmt.Close()
-	result, err := stmt.Exec(customer.Name, customer.Name, customer.Address)
-	return result.LastInsertId()
-
+	result, err := stmt.Exec(customer.Name, customer.Address, customer.MobileNumber)
+	if err != nil {
+		common.Error.Println("Customer could not be created ", err)
+		return
+	}
+	id, err = result.LastInsertId()
+	if err != nil {
+		common.Error.Println("Customer could not be created ", err)
+		return
+	}
+	return
 }
 
 // Update a customer
 func (repo *CustomerRepository) Update(customer *models.Customer) (err error) {
-	_, err = Db.Exec("update customer set `name` = ?, owner = ? , address = ? where id = ?", customer.Name, customer.Name, customer.Address, customer.Id)
+	_, err = Db.Exec("update customer set `name` = ?, mobile = ? , address = ? where id = ?",
+		customer.Name, customer.MobileNumber, customer.Address, customer.Id)
 	if err != nil {
 		common.Error.Println("Customer could not be updated ")
-		panic(err)
+		return
 	}
 	return
 }

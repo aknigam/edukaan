@@ -22,22 +22,27 @@ func init() {
 	Customer.repo = repository.CustomerRepository{}
 }
 
+// https://blog.golang.org/error-handling-and-go
 func (controller *CustomerController) RetrieveCustomer(writer http.ResponseWriter, r *http.Request) {
 
 	vars := mux.Vars(r)
 	id, err := strconv.Atoi(path.Base(vars["id"]))
 	if err != nil {
 		common.Error.Println("Invalid customer id", err)
+		http.Error(writer, err.Error(), http.StatusBadRequest)
 		return
 	}
 	customer, err := controller.repo.Retrieve(id)
 	if err != nil {
+
 		common.Error.Println("Invalid customer id", err)
+		http.Error(writer, err.Error(), http.StatusBadRequest)
 		return
 	}
 	common.Info.Println("customer found %d", id)
 	output, err := json.MarshalIndent(&customer, "", "\t\t")
 	if err != nil {
+		http.Error(writer, err.Error(), http.StatusBadRequest)
 		return
 	}
 	writer.Header().Set("Content-Type", "application/json")
@@ -51,6 +56,7 @@ func (controller *CustomerController) DeleteCustomer(w http.ResponseWriter, r *h
 	vars := mux.Vars(r)
 	id, err := strconv.Atoi(path.Base(vars["id"]))
 	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
@@ -58,6 +64,7 @@ func (controller *CustomerController) DeleteCustomer(w http.ResponseWriter, r *h
 	controller.repo.Delete(&customer)
 	if err != nil {
 		common.Error.Println("Customer could not be deleted ", id)
+		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 	common.Info.Println("Customer deleted ", id)
@@ -69,6 +76,7 @@ func (controller *CustomerController) UpdateCustomer(w http.ResponseWriter, r *h
 	vars := mux.Vars(r)
 	id, err := strconv.Atoi(path.Base(vars["id"]))
 	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
@@ -81,6 +89,7 @@ func (controller *CustomerController) UpdateCustomer(w http.ResponseWriter, r *h
 	error := controller.repo.Update(&customer)
 	if error != nil {
 		common.Error.Println("Customer could not be updated", err)
+		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 	w.WriteHeader(http.StatusOK)
@@ -88,7 +97,7 @@ func (controller *CustomerController) UpdateCustomer(w http.ResponseWriter, r *h
 	return
 }
 
-func (controller *CustomerController) CreateCustomer(w http.ResponseWriter, r *http.Request) {
+func (controller *CustomerController) CreateCustomer(w http.ResponseWriter, r *http.Request) *error {
 	len := r.ContentLength
 	body := make([]byte, len)
 	r.Body.Read(body)
@@ -98,10 +107,10 @@ func (controller *CustomerController) CreateCustomer(w http.ResponseWriter, r *h
 	id, err := controller.repo.Create(&customer)
 	if err != nil {
 		common.Error.Println("Customer could not be created", err)
-		return
+		return &err
 	}
 	w.WriteHeader(http.StatusOK)
 	common.Info.Println("Created customer with id ", id)
-	return
+	return nil
 
 }
