@@ -37,6 +37,8 @@ func SetVendorRoutes(r *mux.Router) {
 	// change order status
 	r.HandleFunc("/orders/{id}/statusupdate", DoNothing).Methods("POST")
 
+	r.HandleFunc("/notes/save", controllers.Note.AddNote).Methods("POST")
+
 }
 
 func DoNothing(writer http.ResponseWriter, r *http.Request) {
