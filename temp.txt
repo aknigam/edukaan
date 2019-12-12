@@ -1,0 +1,29 @@
+noteSnippet.Content
+noteSnippet.Content
+noteSnippet.Content
+This is testing
+This is testing
+This is testing
+This is testing from extension
+This article explains the internal architecture of the Java Virtual Machine (JVM). The following diagram show the key internal components of a typical JVM that conforms to The Java Virtual Machine Specification Java SE 7 Edition.
+This article explains the internal architecture of the Java Virtual Machine (JVM). The following diagram show the key internal components of a typical JVM that conforms to The Java Virtual Machine Specification Java SE 7 Edition.  The components shown on this diagram are each explained below in two sections. First section covers the components that are created for each thread and the second section covers the components that are created independently of threads. Threads JVM System Threads Per Thread program Counter (PC) Stack Native Stack Stack Restrictions Frame Local Variables Array Operand Stack Dynamic Linking
+The components shown on this diagram are each explained below in two sections. First section covers the components that are created for each thread and the second section covers the components that are created independently of threads.
+What is the Go standard library and why is it important? The Go standard library is a set of core packages that enhance and extend the language. These packages add to the number of different types of programs you can write without the need to build your own packages or download packages others have published. Since these packages are tied to the language, they come with some special guarantees:
+declaration
+
+I am doing some tests to understand the behaviour of @Transactional in Spring 3. Though, it is not working as I would expect. If have one method with Propagation.REQUIRED calling another with Propagation.REQUIRES_NEW, will the second method be able to retrieve from the DB the data inserted by the first method?
+
+Anand Nigam
+This article explains the internal architecture of the Java Virtual Machine (JVM). The following diagram show the key internal components of a typical JVM that conforms to The Java Virtual Machine Specification Java SE 7 Edition.
+
+Anand Nigam
+James D Bloom James Bloom is an architect and technical lead with 13 years experience developing web based distributed enterprise systems in a wide range of industries. He builds high performance adaptive web sites that are designed to run reliably across a wide range of devices. He also focuses on high quality sustainable delivery through fast feedback loops in agile, continuous delivery, and a very high level of automated testing across a wide range of devices. He builds solutions that maximise return-on-investment by analysing patterns of user behaviour in response to changes in design, performance and errors.
+
+Anand Nigam
+A thread is a thread of execution in a program. The JVM allows an application to have multiple threads of execution running concurrently. In the Hotspot JVM there is a direct mapping between a Java Thread and a native operating system Thread. After preparing all of the state for a Java thread such as thread-local storage, allocation buffers, synchronization objects, stacks and the program counter, the native thread is created. The native thread is reclaimed once the Java thread terminates. The operating system is therefore responsible for scheduling all threads and dispatching them to any available CPU. Once the native thread has initialized it invokes the
+
+Anand Nigam
+A thread is a thread of execution in a program. The JVM allows an application to have multiple threads of execution running concurrently. In the Hotspot JVM there is a direct mapping between a Java Thread and a native operating system Thread. After preparing all of the state for a Java thread such as thread-local storage, allocation buffers, synchronization objects, stacks and the program counter, the native thread is created. The native thread is reclaimed once the Java thread terminates. The operating system is therefore responsible for scheduling all threads and dispatching them to any available CPU. Once the native thread has initialized it invokes the
+
+http://blog.jamesdbloom.com/JVMInternals.html
+After preparing all of the state for a Java thread such as thread-local storage, allocation buffers, synchronization objects, stacks and the program counter, the native thread is created. The native thread is reclaimed once the Java thread terminates. The operating system is therefore responsible for scheduling all threads and dispatching them to any available CPU. Once the native thread has initialized it invokes the run() method in the Java thread. When the run() method returns, uncaught e

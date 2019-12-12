@@ -21,7 +21,8 @@ func (repo *VendorRepository) Retrieve(id int) (vendor models.Vendor, err error)
 		return
 	}
 	defer txn.Commit()
-	err = Db.QueryRow("select id, `name`, owner, address from vendor where id = ?", id).Scan(&vendor.Id, &vendor.Name, &vendor.Owner, &vendor.Address)
+	err = Db.QueryRow("select id, `name`, owner, address from vendor where id = ?", id).
+		Scan(&vendor.Id, &vendor.Name, &vendor.Owner, &vendor.Address)
 	if err != nil {
 		txn.Rollback()
 	}
