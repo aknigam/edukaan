@@ -19,7 +19,7 @@ func (repo *OrderRepository) Retrieve(id int) (order models.Order, err error) {
 	order = models.Order{}
 	txn, err := Db.Begin()
 	if err != nil {
-		return
+		return order, err
 	}
 	defer txn.Commit()
 	err = Db.QueryRow("select id, `vendorId`, customerId, orderDetails, status from `order` where id = ?", id).
@@ -31,11 +31,11 @@ func (repo *OrderRepository) Retrieve(id int) (order models.Order, err error) {
 }
 
 // Create a new order
-func (repo *OrderRepository) Create(order *models.Order) (id int64, err error) {
+func (repo *OrderRepository) Create(order *models.Order) (id int, err error) {
 	statement := "insert into `order` (vendorId, customerId, orderDetails, status) values (?, ?, ?, ?)"
 	stmt, err := Db.Prepare(statement)
 	if err != nil {
-		return
+		return id, err
 	}
 	defer stmt.Close()
 	result, err := stmt.Exec(order.VendorId, order.CustomerId, order.OrderDetails, order.Status)
@@ -43,7 +43,8 @@ func (repo *OrderRepository) Create(order *models.Order) (id int64, err error) {
 		common.Error.Println("Order could not be created ", err)
 		return
 	}
-	return result.LastInsertId()
+	generatedId, err := result.LastInsertId()
+	return int(generatedId), err
 
 }
 
@@ -52,7 +53,7 @@ func (repo *OrderRepository) Update(order *models.Order) (err error) {
 	_, err = Db.Exec("update `order` set orderDetails = ? where id = ?", order.OrderDetails, order.Id)
 	if err != nil {
 		common.Error.Println("Order could not be updated ")
-		panic(err)
+		return err
 	}
 	return
 }
@@ -64,7 +65,7 @@ func (repo *OrderRepository) Delete(order *models.Order) (err error) {
 }
 
 // refer: http://go-database-sql.org/retrieving.html
-func (repo *OrderRepository) FindOrders(vendorId int64) (s []models.Order, err error) {
+func (repo *OrderRepository) FindOrders(vendorId int64) (orders []models.Order, err error) {
 	rows, err := Db.Query("select id, `vendorId`, customerId, orderDetails, status from `order` where vendorId = ?", vendorId)
 	if err != nil {
 		common.Error.Println("Could not find orders ", err)
@@ -77,14 +78,15 @@ func (repo *OrderRepository) FindOrders(vendorId int64) (s []models.Order, err e
 		err := rows.Scan(&order.Id, &order.VendorId, &order.CustomerId, &order.OrderDetails, &order.Status)
 		if err != nil {
 			common.Error.Println("Could not find orders ", err)
-			break
+			return orders, err
 		}
-		s = append(s, order)
+		orders = append(orders, order)
 	}
 	err = rows.Err()
 	if err != nil {
 		log.Fatal(err)
+		return orders, err
 	}
 
-	return
+	return orders, err
 }

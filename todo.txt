@@ -1,0 +1,4 @@
+
+TODO list
+
+- return pointer reference from all the functions to avoid creation of unnecessary copy objects

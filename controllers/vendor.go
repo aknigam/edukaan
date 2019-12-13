@@ -2,13 +2,11 @@ package controllers
 
 import (
 	"edukaan/common"
+	"edukaan/errors"
 	"edukaan/models"
 	"edukaan/repository"
 	"encoding/json"
-	"github.com/gorilla/mux"
 	"net/http"
-	"path"
-	"strconv"
 )
 
 type VendorController struct {
@@ -22,7 +20,7 @@ func init() {
 	Vendor.repo = repository.VendorRepository{}
 }
 
-func (controller *VendorController) FindVendor(w http.ResponseWriter, r *http.Request) *error {
+func (controller *VendorController) FindVendor(w http.ResponseWriter, r *http.Request) (error *errors.AppError) {
 
 	name := r.URL.Query().Get("name")
 	common.Info.Println("Search query name ", name)
@@ -30,99 +28,86 @@ func (controller *VendorController) FindVendor(w http.ResponseWriter, r *http.Re
 	vendors, err := controller.repo.FindVendors(name)
 	if err != nil {
 		common.Error.Println("Could not find any vendors with name: ", name, err)
-		return &err
+		return &errors.AppError{Error: err, Message: "Order Id not provided", Code: -1}
 	}
 	output, err := json.MarshalIndent(&vendors, "", "\t\t")
 	if err != nil {
-		return &err
+		return &errors.AppError{Error: err, Message: "Order Id not provided", Code: -1}
 	}
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	w.Write(output)
 
 	return nil
-	return nil
 }
 
-func (controller *VendorController) RetrieveVendor(writer http.ResponseWriter, r *http.Request) {
+func (controller *VendorController) RetrieveVendor(writer http.ResponseWriter, r *http.Request) (error *errors.AppError) {
 
-	vars := mux.Vars(r)
-	//The Atoi function converts an alphanumeric string to an integer
-	id, err := strconv.Atoi(path.Base(vars["id"]))
-	if err != nil {
-		common.Error.Println("Invalid vendor id", err)
-		return
+	id, error, hasError := ExtractPathParam(r, "id")
+	if hasError {
+		return error
 	}
 	vendor, err := controller.repo.Retrieve(id)
 	if err != nil {
 		common.Error.Println("Invalid vendor id", err)
-		return
+		return &errors.AppError{Error: err, Message: "Invalid vendor Id", Code: 400}
 	}
 	common.Info.Println("vendor found %d", id)
-	output, err := json.MarshalIndent(&vendor, "", "\t\t")
-	if err != nil {
-		return
-	}
-	writer.Header().Set("Content-Type", "application/json")
-	writer.WriteHeader(http.StatusOK)
-	writer.Write(output)
-
-	return
+	return WriteOKResponse(vendor, writer)
 }
 
-func (controller *VendorController) DeleteVendor(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	id, err := strconv.Atoi(path.Base(vars["id"]))
-	if err != nil {
-		return
+func (controller *VendorController) DeleteVendor(w http.ResponseWriter, r *http.Request) (error *errors.AppError) {
+
+	id, error, hasError := ExtractPathParam(r, "id")
+	if hasError {
+		return error
 	}
 
 	vendor := models.Vendor{Id: id}
-	controller.repo.Delete(&vendor)
+	err := controller.repo.Delete(&vendor)
 	if err != nil {
 		common.Error.Println("Vendor could not be deleted ", id)
 		return
 	}
 	common.Info.Println("Vendor deleted ", id)
 	w.WriteHeader(http.StatusOK)
+	return
 
 }
 
-func (controller *VendorController) UpdateVendor(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	id, err := strconv.Atoi(path.Base(vars["id"]))
-	if err != nil {
-		return
+func (controller *VendorController) UpdateVendor(w http.ResponseWriter, r *http.Request) (error *errors.AppError) {
+	var vendor models.Vendor
+	id, error, done := ExtractIdentifierAndEntity(r, &vendor, w)
+	if done {
+		return error
 	}
 
-	len := r.ContentLength
-	body := make([]byte, len)
-	r.Body.Read(body)
-	var vendor models.Vendor
-	json.Unmarshal(body, &vendor)
 	vendor.Id = id
-	error := controller.repo.Update(&vendor)
+	err := controller.repo.Update(&vendor)
+
 	if error != nil {
 		common.Error.Println("Vendor could not be updated", err)
-		return
+		return &errors.AppError{Error: err, Message: "Order Id not provided", Code: -1}
 	}
 	w.WriteHeader(http.StatusOK)
 	// location header should also be set as per the REST standards
 	return
 }
 
-func (controller *VendorController) CreateVendor(w http.ResponseWriter, r *http.Request) {
-	len := r.ContentLength
-	body := make([]byte, len)
-	r.Body.Read(body)
+func (controller *VendorController) CreateVendor(w http.ResponseWriter, r *http.Request) (error *errors.AppError) {
+
 	var vendor models.Vendor
-	json.Unmarshal(body, &vendor)
+	appError, hasError := ParseRequest(r, &vendor, w)
+	if hasError {
+		return appError
+	}
 
 	id, err := controller.repo.Create(&vendor)
 	if err != nil {
 		common.Error.Println("Vendor could not be created", err)
 		return
 	}
+
 	w.WriteHeader(http.StatusOK)
 	common.Info.Println("Created vendor with id ", id)
 	return

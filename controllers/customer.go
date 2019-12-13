@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"edukaan/common"
+	"edukaan/errors"
 	"edukaan/models"
 	"edukaan/repository"
 	"encoding/json"
@@ -23,7 +24,7 @@ func init() {
 }
 
 // https://blog.golang.org/error-handling-and-go
-func (controller *CustomerController) RetrieveCustomer(writer http.ResponseWriter, r *http.Request) {
+func (controller *CustomerController) RetrieveCustomer(writer http.ResponseWriter, r *http.Request) (error *errors.AppError) {
 
 	vars := mux.Vars(r)
 	id, err := strconv.Atoi(path.Base(vars["id"]))
@@ -52,7 +53,7 @@ func (controller *CustomerController) RetrieveCustomer(writer http.ResponseWrite
 	return
 }
 
-func (controller *CustomerController) DeleteCustomer(w http.ResponseWriter, r *http.Request) {
+func (controller *CustomerController) DeleteCustomer(w http.ResponseWriter, r *http.Request) (error *errors.AppError) {
 	vars := mux.Vars(r)
 	id, err := strconv.Atoi(path.Base(vars["id"]))
 	if err != nil {
@@ -65,14 +66,14 @@ func (controller *CustomerController) DeleteCustomer(w http.ResponseWriter, r *h
 	if err != nil {
 		common.Error.Println("Customer could not be deleted ", id)
 		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
+		return &errors.AppError{err, "Order Id not provided", -1}
 	}
 	common.Info.Println("Customer deleted ", id)
 	w.WriteHeader(http.StatusOK)
-
+	return
 }
 
-func (controller *CustomerController) UpdateCustomer(w http.ResponseWriter, r *http.Request) {
+func (controller *CustomerController) UpdateCustomer(w http.ResponseWriter, r *http.Request) (error *errors.AppError) {
 	vars := mux.Vars(r)
 	id, err := strconv.Atoi(path.Base(vars["id"]))
 	if err != nil {
@@ -86,18 +87,18 @@ func (controller *CustomerController) UpdateCustomer(w http.ResponseWriter, r *h
 	var customer models.Customer
 	json.Unmarshal(body, &customer)
 	customer.Id = id
-	error := controller.repo.Update(&customer)
+	err = controller.repo.Update(&customer)
 	if error != nil {
 		common.Error.Println("Customer could not be updated", err)
 		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
+		return &errors.AppError{err, "Order Id not provided", -1}
 	}
 	w.WriteHeader(http.StatusOK)
 	// location header should also be set as per the REST standards
 	return
 }
 
-func (controller *CustomerController) CreateCustomer(w http.ResponseWriter, r *http.Request) *error {
+func (controller *CustomerController) CreateCustomer(w http.ResponseWriter, r *http.Request) (error *errors.AppError) {
 	len := r.ContentLength
 	body := make([]byte, len)
 	r.Body.Read(body)
@@ -107,7 +108,7 @@ func (controller *CustomerController) CreateCustomer(w http.ResponseWriter, r *h
 	id, err := controller.repo.Create(&customer)
 	if err != nil {
 		common.Error.Println("Customer could not be created", err)
-		return &err
+		return &errors.AppError{err, "Order Id not provided", -1}
 	}
 	w.WriteHeader(http.StatusOK)
 	common.Info.Println("Created customer with id ", id)

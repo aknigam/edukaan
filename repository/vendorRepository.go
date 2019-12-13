@@ -30,7 +30,7 @@ func (repo *VendorRepository) Retrieve(id int) (vendor models.Vendor, err error)
 }
 
 // Create a new vendor
-func (repo *VendorRepository) Create(vendor *models.Vendor) (id int64, err error) {
+func (repo *VendorRepository) Create(vendor *models.Vendor) (id int, err error) {
 	statement := "insert into vendor (name, owner, address) values (?, ?, ?)"
 	stmt, err := Db.Prepare(statement)
 	if err != nil {
@@ -38,7 +38,8 @@ func (repo *VendorRepository) Create(vendor *models.Vendor) (id int64, err error
 	}
 	defer stmt.Close()
 	result, err := stmt.Exec(vendor.Name, vendor.Owner, vendor.Address)
-	return result.LastInsertId()
+	generatedId, err := result.LastInsertId()
+	return int(generatedId), err
 
 }
 
