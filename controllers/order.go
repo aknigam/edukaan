@@ -36,6 +36,9 @@ func (controller *OrderController) RetrieveOrder(writer http.ResponseWriter, r *
 		return
 	}
 	common.Info.Println("order found %d", id)
+	// use encoder here instead of marshallking . That will be 50% faster
+	// https://learning.oreilly.com/library/view/building-microservices-with/9781786468666/4f3ac8c1-a27f-4d1d-819d-2a16e51bb7b3.xhtml
+	// /Users/a.nigam/Documents/workspace-old/gospace/src/BuildingMicroserviceswithGo_Code/Chapter01/chapter1-master/reading_writing_json_3/reading_writing_json_3.go
 	output, err := json.MarshalIndent(&order, "", "\t\t")
 	if err != nil {
 		return
@@ -76,6 +79,8 @@ func (controller *OrderController) UpdateOrder(w http.ResponseWriter, r *http.Re
 	body := make([]byte, len)
 	r.Body.Read(body)
 	var order models.Order
+	// instead of unmarshal use decoder
+	// refer: Chapter01/chapter1-master/reading_writing_json_5/reading_writing_json_5.go
 	json.Unmarshal(body, &order)
 	order.Id = id
 	error := controller.repo.Update(&order)

@@ -47,6 +47,7 @@ func (controller *VendorController) FindVendor(w http.ResponseWriter, r *http.Re
 func (controller *VendorController) RetrieveVendor(writer http.ResponseWriter, r *http.Request) {
 
 	vars := mux.Vars(r)
+	//The Atoi function converts an alphanumeric string to an integer
 	id, err := strconv.Atoi(path.Base(vars["id"]))
 	if err != nil {
 		common.Error.Println("Invalid vendor id", err)

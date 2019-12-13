@@ -5,6 +5,7 @@ import (
 	"edukaan/routers"
 	"github.com/gorilla/mux"
 	"net/http"
+	"time"
 )
 
 func main() {
@@ -16,17 +17,17 @@ func main() {
 	routers.SetVendorRoutes(router)
 
 	http.Handle("/", router)
-	server := http.Server{
-		Addr: ":8080",
+	//server := http.Server{
+	//	Addr: ":8080",
+	//}
+
+	server := &http.Server{
+		Addr:           config.Address,
+		ReadTimeout:    time.Duration(config.ReadTimeout * int64(time.Second)),
+		WriteTimeout:   time.Duration(config.WriteTimeout * int64(time.Second)),
+		MaxHeaderBytes: 1 << 20,
 	}
-	/*
-		server := &http.Server{
-			Addr:           config.Address,
-			ReadTimeout:    time.Duration(config.ReadTimeout * int64(time.Second)),
-			WriteTimeout:   time.Duration(config.WriteTimeout * int64(time.Second)),
-			MaxHeaderBytes: 1 << 20,
-		}
-	*/
+
 	err := server.ListenAndServe()
 
 	if err != nil {
